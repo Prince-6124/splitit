@@ -5,6 +5,8 @@ import path from "path";
 import multer from "multer";
 import { promisify } from "util";
 import archiver from "archiver";
+import { getVideoDuration, splitVideoIntoClips } from "@/lib/ffmpegHelpers";
+
 
 const UPLOAD_DIR = path.join(process.cwd(), "temp_uploads");
 const OUTPUT_DIR = path.join(process.cwd(), "temp_output");
@@ -56,8 +58,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       });
 
-    const duration = await getDuration();
+    const duration = await getVideoDuration(filePath);
     const numClips = Math.ceil(duration / length);
+    await splitVideoIntoClips(filePath, clipsDir, length);
+
 
     const clipPromises = Array.from({ length: numClips }, (_, i) => {
       const start = i * length;
