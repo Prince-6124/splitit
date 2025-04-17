@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Splitter</title>
+</head>
+<body>
+  <h1>Split Video</h1>
+  <form id="splitForm">
+    <label for="file">Choose a video file:</label>
+    <input type="file" id="file" name="file" accept="video/*" required><br><br>
+    
+    <label for="length">Clip length (in seconds):</label>
+    <input type="number" id="length" name="length" min="1" required><br><br>
+    
+    <button type="submit">Split Video</button>
+  </form>
+
+  <h2>Download your split video clips</h2>
+  <a id="downloadLink" href="#" style="display: none;" download>Download ZIP</a>
+
+  <script>
+    const form = document.getElementById("splitForm");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      
+      const fileInput = document.getElementById("file");
+      const lengthInput = document.getElementById("length");
+      
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+      formData.append("length", lengthInput.value);
+
+      const response = await fetch("http://localhost:4000/splitit", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const downloadLink = document.getElementById("downloadLink");
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        downloadLink.href = url;
+        downloadLink.style.display = "block";
+      } else {
+        alert("Failed to process video");
+      }
+    });
+  </script>
+</body>
+</html>
